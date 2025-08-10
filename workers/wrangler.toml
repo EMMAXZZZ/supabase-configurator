@@ -1,0 +1,40 @@
+name = "sbconfig"
+main = "index.js"
+compatibility_date = "2024-01-10"
+compatibility_flags = ["nodejs_compat"]
+
+# Production routes for SBConfig.com
+routes = [
+  { pattern = "sbconfig.com/*", zone_name = "sbconfig.com" },
+  { pattern = "www.sbconfig.com/*", zone_name = "sbconfig.com" }
+]
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+DOMAIN = "sbconfig.com"
+
+# KV storage (if you want to store configurations or add rate limiting)
+# [[kv_namespaces]]
+# binding = "CONFIG_STORE"
+# id = "your-kv-namespace-id"
+# preview_id = "your-preview-kv-namespace-id"
+
+# Durable Objects (if you want advanced state management)
+# [[durable_objects.bindings]]
+# name = "CONFIG_GENERATOR"
+# class_name = "ConfigGenerator"
+
+# Cron triggers for maintenance tasks (optional)
+# [[triggers.crons]]
+# cron = "0 0 * * *"
+# worker = "supabase-configurator"
+
+# Resource limits
+[limits]
+# CPU time limit in milliseconds (default: 50ms for free tier, 50000ms for paid)
+cpu_ms = 50
+
+# Observability (optional - for paid plans)
+# [observability]
+# enabled = true

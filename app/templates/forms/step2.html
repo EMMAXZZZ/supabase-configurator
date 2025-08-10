@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Step 2: Security & Authentication</h2>
+  <form method="post" action="/form/step2" class="stack">
+    <label>
+      <div>JWT Secret (Tier 2 Base64URL, 64 chars)</div>
+      <input type="text" name="jwt_secret" value="{{ form_values.jwt_secret }}" />
+    </label>
+    <label>
+      <div>Anon API Key (Tier 2 Base64URL, 32 chars)</div>
+      <input type="text" name="anon_key" value="{{ form_values.anon_key }}" />
+    </label>
+    <label>
+      <div>Service Role API Key (Tier 2 Base64URL, 32 chars)</div>
+      <input type="text" name="service_role_key" value="{{ form_values.service_role_key }}" />
+    </label>
+    <label>
+      <div>Dashboard Password (Tier 1 alphanumeric, optional, ≥15)</div>
+      <input type="text" name="dashboard_password" value="{{ form_values.dashboard_password }}" />
+    </label>
+
+    <div class="actions">
+      <button class="btn btn-secondary" type="submit" name="action" value="generate">Generate Missing Values</button>
+      <button class="btn btn-primary" type="submit" name="action" value="preview">Preview Security Values</button>
+      <a class="btn btn-ghost ml-auto" href="/form/step1">Back</a>
+    </div>
+  </form>
+
+  {% if errors and errors|length %}
+  <div class="error-block">
+    <strong>Validation Errors:</strong>
+    <ul>
+      {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="mt-1">
+    <h3>Security Preview</h3>
+    <textarea class="textarea" readonly>{{ preview_security or '' }}</textarea>
+  </div>
+</div>
+{% endblock %}

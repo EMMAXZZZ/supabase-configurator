@@ -1,0 +1,51 @@
+/* Minimal styling placeholder */
+:root { color-scheme: light dark; }
+body { line-height: 1.6; }
+a { color: #2563eb; }
+
+/* Themed controls leveraging supabase_tron_theme.css variables */
+button, .btn {
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius, 0.25rem);
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--card, #f9fafb);
+  color: var(--card-foreground, #111827);
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--primary, #06b6d4);
+  color: var(--primary-foreground, #0a0a0a);
+  border-color: var(--primary, #06b6d4);
+  box-shadow: var(--shadow-xs, none);
+}
+
+.btn-secondary {
+  background: var(--accent, #3b82f6);
+  color: var(--accent-foreground, #0a0a0a);
+  border-color: var(--accent, #3b82f6);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--foreground, #111827);
+}
+
+input, textarea, select {
+  background: var(--input, #ffffff);
+  color: var(--foreground, #111827);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius, 0.25rem);
+  width: 100%;
+  padding: 8px;
+}
+
+/* Layout utilities to replace inline styles in templates */
+.stack { display: grid; gap: 0.75rem; max-width: 700px; }
+.actions { display: flex; gap: 0.5rem; align-items: center; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.textarea { width: 100%; height: 240px; }
+.error-block { margin-top: 1rem; color: #b91c1c; }
+.mt-1 { margin-top: 1rem; }
+.ml-auto { margin-left: auto; }

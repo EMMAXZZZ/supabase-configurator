@@ -1,0 +1,177 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'workers/**'
+      - '.github/workflows/deploy.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'workers/**'
+
+jobs:
+  # Deploy to staging on staging branch or PR
+  deploy-staging:
+    if: github.ref == 'refs/heads/staging' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'workers/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: workers
+
+      - name: Run tests (if any)
+        run: |
+          # Add test commands here when you have tests
+          echo "Tests would run here"
+        working-directory: workers
+
+      - name: Deploy to Cloudflare Workers (Staging)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config wrangler.staging.toml
+          workingDirectory: workers
+
+      - name: Comment PR with staging URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Staging deployment complete!\n\n**Preview URL:** https://staging.sbconfig.com\n\nTest your changes before merging to production.'
+            })
+
+  # Deploy to production on main branch
+  deploy-production:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'workers/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: workers
+
+      - name: Run tests (if any)
+        run: |
+          # Add test commands here when you have tests
+          echo "Tests would run here"
+        working-directory: workers
+
+      - name: Deploy to Cloudflare Workers (Production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config wrangler.toml
+          workingDirectory: workers
+
+      - name: Create deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment?.id || 0,
+              state: 'success',
+              environment_url: 'https://sbconfig.com',
+              description: 'Deployment to production successful'
+            })
+
+  # Health check after deployment
+  health-check:
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Production Health Check
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Health Check
+        run: |
+          echo "Checking production health..."
+          
+          # Check main domain
+          if curl -f -s --max-time 10 https://sbconfig.com/health > /dev/null; then
+            echo "✅ sbconfig.com is healthy"
+          else
+            echo "❌ sbconfig.com health check failed"
+            exit 1
+          fi
+          
+          # Check www redirect
+          if curl -f -s --max-time 10 https://www.sbconfig.com/health > /dev/null; then
+            echo "✅ www.sbconfig.com is healthy"
+          else
+            echo "❌ www.sbconfig.com health check failed"
+            exit 1
+          fi
+          
+          echo "🎉 All health checks passed!"
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Production Deployment Health Check Failed',
+              body: `Production deployment health check failed for commit ${context.sha}.\n\nPlease investigate immediately.\n\n**Commit:** ${context.sha}\n**Workflow:** ${context.workflow}\n**Run:** ${context.runId}`
+            })
+
+  # Lighthouse performance test (optional)
+  lighthouse:
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Lighthouse Performance Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for deployment
+        run: sleep 45
+
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            https://sbconfig.com
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true

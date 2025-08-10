@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supabase Config Generator</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <style>
+    body { font-family: var(--font-sans, system-ui, -apple-system, Segoe UI, Roboto, sans-serif); margin: 2rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { margin-bottom: 1.5rem; }
+    .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; }
+    code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 4px; }
+  </style>
+  <!-- Fonts for theme -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Theme stylesheet from .superdesign integration. Placed after the inline style so it overrides defaults. -->
+  <link rel="stylesheet" href="/static/supabase_tron_theme.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Supabase Config Generator</h1>
+      <p>Generate deployment-ready configs with safe credentials.</p>
+    </header>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

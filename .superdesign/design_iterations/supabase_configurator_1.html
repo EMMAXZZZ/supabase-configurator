@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Config Generator - TRON Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="supabase_tron_theme.css">
+    <style>
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: var(--font-sans);
+        }
+        h1, h2, h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            text-shadow: var(--shadow-xs);
+        }
+        .circuit-background {
+            background-image: linear-gradient(var(--primary, #00FFFF) 1px, transparent 1px), linear-gradient(to right, var(--primary, #00FFFF) 1px, transparent 1px);
+            background-size: 60px 60px;
+            background-color: var(--background, #000022);
+            opacity: 0.05;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+        }
+        .form-container {
+            background-color: oklch(from var(--card) l c h / 0.8);
+            border: 1px solid var(--border, #00FFFF80);
+            box-shadow: var(--shadow-xl);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease-in-out;
+        }
+        .form-page {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .form-page.hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            position: absolute;
+        }
+        .neon-input {
+            background-color: var(--input);
+            border: 1px solid var(--border);
+            color: var(--foreground);
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            font-family: var(--font-mono);
+        }
+        .neon-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            animation: pulse-glow 1.5s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 8px 0 var(--primary); }
+            to { box-shadow: 0 0 16px 4px var(--primary); }
+        }
+        .holographic-button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            text-shadow: var(--shadow-xs);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            border-radius: var(--radius);
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .holographic-button:hover {
+            background-color: oklch(from var(--primary) l c h / 0.1);
+            color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .holographic-button.secondary {
+            border-color: var(--muted-foreground);
+            color: var(--muted-foreground);
+        }
+        .holographic-button.secondary:hover {
+            background-color: oklch(from var(--muted-foreground) l c h / 0.1);
+            box-shadow: 0 0 12px 0 var(--muted-foreground);
+        }
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .progress-bar .step {
+            text-align: center;
+            color: var(--muted-foreground);
+            transition: color 0.4s ease;
+            z-index: 1;
+        }
+        .progress-bar .step.active {
+            color: var(--primary);
+        }
+        .progress-bar .line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 2px;
+            width: 100%;
+            background-color: var(--border);
+            z-index: 0;
+        }
+        .progress-bar .line-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .code-preview {
+            background-color: var(--input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: var(--font-mono);
+            height: 250px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="circuit-background"></div>
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <header class="text-center mb-8">
+            <i data-lucide="shield-zap" class="h-16 w-16 mx-auto text-primary"></i>
+            <h1 class="text-4xl mt-4">Supabase Config Generator</h1>
+            <p class="text-muted-foreground">Generate deployment-ready configs with safe credentials.</p>
+        </header>
+
+        <main class="form-container w-full max-w-4xl p-8">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="line"><div id="progress-line" class="line-fill"></div></div>
+                <div id="step-1" class="step active"><strong>Step 1</strong><br>Basic</div>
+                <div id="step-2" class="step"><strong>Step 2</strong><br>Advanced</div>
+                <div id="step-3" class="step"><strong>Step 3</strong><br>Preview</div>
+            </div>
+
+            <form id="config-form">
+                <!-- Page 1: Basic Configuration -->
+                <div id="page-1" class="form-page">
+                    <h2 class="text-2xl mb-6 text-center">Basic Configuration</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="site-url" class="block text-sm font-medium mb-2 text-muted-foreground">Site URL</label>
+                            <input type="text" id="site-url" class="neon-input" placeholder="https://supabase.your-domain.com">
+                        </div>
+                        <div>
+                            <label for="postgres-pass" class="block text-sm font-medium mb-2 text-muted-foreground">Postgres Password (Tier 1 alphanumeric, ≥32)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="postgres-pass" class="neon-input">
+                                <button type="button" class="holographic-button secondary !py-0">Generate</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="smtp-pass" class="block text-sm font-medium mb-2 text-muted-foreground">SMTP Password (Tier 1 alphanumeric, ≥32)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="smtp-pass" class="neon-input">
+                                <button type="button" class="holographic-button secondary !py-0">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-8">
+                        <button type="button" id="next-1" class="holographic-button">Next Step</button>
+                    </div>
+                </div>
+
+                <!-- Page 2: Advanced Configuration -->
+                <div id="page-2" class="form-page hidden">
+                    <h2 class="text-2xl mb-6 text-center">Advanced Configuration</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="jwt-secret" class="block text-sm font-medium mb-2 text-muted-foreground">JWT Secret (≥32 characters)</label>
+                             <div class="flex gap-2">
+                                <input type="text" id="jwt-secret" class="neon-input">
+                                <button type="button" class="holographic-button secondary !py-0">Generate</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="anon-key" class="block text-sm font-medium mb-2 text-muted-foreground">Anon Key (public)</label>
+                            <input type="text" id="anon-key" class="neon-input" readonly value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfIjoicGxhY2Vob2xkZXIifQ.U3VwYWJhc2UgSXMgQ29vbA">
+                        </div>
+                        <div>
+                            <label for="service-key" class="block text-sm font-medium mb-2 text-muted-foreground">Service Role Key (secret)</label>
+                             <div class="flex gap-2">
+                                <input type="text" id="service-key" class="neon-input">
+                                <button type="button" class="holographic-button secondary !py-0">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button type="button" id="back-2" class="holographic-button secondary">Go Back</button>
+                        <button type="button" id="next-2" class="holographic-button">Next Step</button>
+                    </div>
+                </div>
+
+                <!-- Page 3: Preview & Generate -->
+                <div id="page-3" class="form-page hidden">
+                    <h2 class="text-2xl mb-6 text-center">Preview & Generate</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg mb-2">.env Preview</h3>
+                            <textarea id="env-preview" class="code-preview w-full p-2" readonly></textarea>
+                        </div>
+                        <div>
+                            <h3 class="text-lg mb-2">docker-compose.yml Preview</h3>
+                            <textarea id="docker-preview" class="code-preview w-full p-2" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-8">
+                        <button type="button" id="back-3" class="holographic-button secondary">Go Back</button>
+                        <button type="button" id="download-btn" class="holographic-button">Download Files</button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const pages = document.querySelectorAll('.form-page');
+        const progressLine = document.getElementById('progress-line');
+        const progressSteps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
+        let currentPage = 0;
+
+        function goToPage(pageIndex) {
+            pages[currentPage].classList.add('hidden');
+            pages[pageIndex].classList.remove('hidden');
+            currentPage = pageIndex;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progressPercentage = (currentPage / (pages.length - 1)) * 100;
+            progressLine.style.width = `${progressPercentage}%`;
+            progressSteps.forEach((step, index) => {
+                step.classList.toggle('active', index <= currentPage);
+            });
+        }
+
+        document.getElementById('next-1').addEventListener('click', () => goToPage(1));
+        document.getElementById('next-2').addEventListener('click', () => {
+            updatePreviews();
+            goToPage(2);
+        });
+        document.getElementById('back-2').addEventListener('click', () => goToPage(0));
+        document.getElementById('back-3').addEventListener('click', () => goToPage(1));
+
+        function updatePreviews() {
+            const siteUrl = document.getElementById('site-url').value;
+            const postgresPass = document.getElementById('postgres-pass').value;
+            const jwtSecret = document.getElementById('jwt-secret').value;
+            const anonKey = document.getElementById('anon-key').value;
+            const serviceKey = document.getElementById('service-key').value;
+
+            const envContent = `POSTGRES_PASSWORD=${postgresPass}\nSITE_URL=${siteUrl}\nJWT_SECRET=${jwtSecret}\nANON_KEY=${anonKey}\nSERVICE_ROLE_KEY=${serviceKey}`;
+            document.getElementById('env-preview').value = envContent;
+
+            const dockerContent = `version: '3.9'\nservices:\n  db:\n    image: postgres:15\n    environment:\n      - POSTGRES_PASSWORD=\${POSTGRES_PASSWORD}\n    volumes:\n      - db_data:/var/lib/postgresql/data\nvolumes:\n  db_data:`;
+            document.getElementById('docker-preview').value = dockerContent;
+        }
+
+        // Initialize
+        goToPage(0);
+    </script>
+</body>
+</html>

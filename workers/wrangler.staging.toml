@@ -1,0 +1,19 @@
+name = "sbconfig-staging"
+main = "index.js"
+compatibility_date = "2024-01-10"
+compatibility_flags = ["nodejs_compat"]
+
+# Staging routes for preview subdomain
+routes = [
+  { pattern = "staging.sbconfig.com/*", zone_name = "sbconfig.com" }
+]
+
+# Environment variables
+[vars]
+ENVIRONMENT = "staging"
+DOMAIN = "staging.sbconfig.com"
+
+# Resource limits
+[limits]
+# CPU time limit in milliseconds
+cpu_ms = 50

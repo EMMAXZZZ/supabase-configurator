@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Step 1: Basic Configuration</h2>
+  <form method="post" action="/form/step1" class="stack">
+    <label>
+      <div>Site URL</div>
+      <input type="url" name="site_url" value="{{ form_values.site_url }}" required />
+    </label>
+    <label>
+      <div>Postgres Password (Tier 1 alphanumeric, ≥32)</div>
+      <input type="text" name="postgres_password" value="{{ form_values.postgres_password }}" />
+    </label>
+    <label>
+      <div>SMTP Password (Tier 1 alphanumeric, ≥32)</div>
+      <input type="text" name="smtp_pass" value="{{ form_values.smtp_pass }}" />
+    </label>
+
+    <div class="actions">
+      <button class="btn btn-secondary" type="submit" name="action" value="generate">Generate Missing Values</button>
+      <button class="btn btn-primary" type="submit" name="action" value="preview">Preview Files</button>
+      <a class="btn btn-ghost ml-auto" href="/">Back</a>
+    </div>
+  </form>
+
+  {% if errors and errors|length %}
+  <div class="error-block">
+    <strong>Validation Errors:</strong>
+    <ul>
+      {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="grid-2 mt-1">
+    <div>
+      <h3>.env Preview</h3>
+      <textarea class="textarea" readonly>{{ preview_env or '' }}</textarea>
+    </div>
+    <div>
+      <h3>docker-compose.yml Preview</h3>
+      <textarea class="textarea" readonly>{{ preview_compose or '' }}</textarea>
+    </div>
+  </div>
+</div>
+{% endblock %}
