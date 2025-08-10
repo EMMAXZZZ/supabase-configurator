@@ -25,7 +25,7 @@ Visit **[SBConfig.com](https://sbconfig.com)** to generate your configuration in
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/supabase-configurator.git
+git clone https://github.com/miskaone/supabase-configurator.git
 cd supabase-configurator
 
 # Navigate to workers directory
@@ -213,8 +213,8 @@ Expected costs for typical usage: **$0/month** 💸
 ## 🆘 Support & Issues
 
 ### Getting Help
-- **🐛 Bug reports**: [GitHub Issues](https://github.com/yourusername/supabase-configurator/issues)
-- **💡 Feature requests**: [GitHub Discussions](https://github.com/yourusername/supabase-configurator/discussions)
+- **🐛 Bug reports**: [GitHub Issues](https://github.com/miskaone/supabase-configurator/issues)
+- **💡 Feature requests**: [GitHub Discussions](https://github.com/miskaone/supabase-configurator/discussions)
 - **📧 Contact**: Create an issue for urgent matters
 
 ### Troubleshooting
