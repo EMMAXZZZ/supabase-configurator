@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ConfigFormSchema } from '@/lib/validation';
+import { ZodError } from 'zod';
 import { generateSecureSecret, generatePassword, generateJWT, generateEnvFile, generateDockerCompose, generateDockerComposeOverride } from '@/lib/config-generator';
 import type { GeneratedConfig } from '@/lib/types';
 
@@ -56,8 +57,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Coerce boolean-like strings for known fields
-    if (typeof (data as any).enable_dev_override === 'string') {
-      (data as any).enable_dev_override = (data as any).enable_dev_override === 'true';
+    const boolKeys = ['enable_dev_override', 'enable_vector', 'enable_logflare', 'enable_pgvector'] as const;
+    for (const k of boolKeys) {
+      if (typeof (data as any)[k] === 'string') {
+        const v = ((data as any)[k] as string).toLowerCase();
+        (data as any)[k] = v === 'true' || v === '1' || v === 'on' || v === 'yes';
+      }
     }
 
     // Validate input using Zod schema
@@ -322,10 +327,18 @@ ${logflareEnabled ? `  # Forward structured logs to Logflare (analytics service)
     };
     console.error('Configuration generation failed:', safeError);
 
-    if (error.name === 'ZodError') {
-      const errorMessages = error.errors.map((err: any) => `${err.path.join('.')}: ${err.message}`);
+    if (error instanceof ZodError) {
+      const errorMessages = error.errors.map((err) => `${err.path.join('.')}: ${err.message}`);
       return NextResponse.json({ error: 'Validation failed', errors: errorMessages }, { status: 400 });
     }
+    // Fallback: some runtimes stringify ZodError into message
+    try {
+      const parsed = JSON.parse(error?.message || 'null');
+      if (Array.isArray(parsed)) {
+        const msgs = parsed.map((e: any) => `${(e.path || []).join('.')}: ${e.message}`);
+        return NextResponse.json({ error: 'Validation failed', errors: msgs }, { status: 400 });
+      }
+    } catch {}
 
     const errRes = NextResponse.json(
       { error: 'Internal server error', message: process.env.NODE_ENV === 'development' ? (error?.message || 'Error') : 'Configuration generation failed' },
