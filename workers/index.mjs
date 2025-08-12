@@ -2617,9 +2617,7 @@ async function handleRequest(request) {
     }
 }
 
-// Export module worker handler
-export default {
-    async fetch(request, env, ctx) {
-        return handleRequest(request);
-    }
-};
+// Service-worker style fetch handler for Cloudflare Workers
+addEventListener('fetch', (event) => {
+    event.respondWith(handleRequest(event.request));
+});
