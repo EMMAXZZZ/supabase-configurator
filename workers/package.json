@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Supabase Configuration Generator - Cloudflare Workers",
   "type": "module",
-  "main": "index.mjs",
+  "main": "index.js",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
