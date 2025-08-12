@@ -2617,7 +2617,9 @@ async function handleRequest(request) {
     }
 }
 
-// Register fetch handler (Service Worker syntax)
-addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request));
-});
+// Export module worker handler
+export default {
+    async fetch(request, env, ctx) {
+        return handleRequest(request);
+    }
+};
