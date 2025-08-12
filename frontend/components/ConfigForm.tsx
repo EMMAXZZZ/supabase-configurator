@@ -18,6 +18,10 @@ export function ConfigForm() {
     anon_key: '',
     service_key: '',
     enable_dev_override: true,
+    canonical_url: '',
+    enable_vector: true,
+    enable_logflare: true,
+    enable_pgvector: true,
   });
   const [errors, setErrors] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -194,6 +198,27 @@ export function ConfigForm() {
               Admin email for SSL certificates and notifications
             </p>
           </div>
+
+          <div className="form-group">
+            <label htmlFor="canonical_url" className="block text-muted-foreground text-sm font-semibold uppercase tracking-wide mb-2">
+              Canonical Site URL (for headers)
+            </label>
+            <input
+              type="url"
+              id="canonical_url"
+              name="canonical_url"
+              value={(formData as any).canonical_url || ''}
+              onChange={handleInputChange}
+              className={`neon-input ${fieldErrors.canonical_url ? 'border-destructive' : ''}`}
+              placeholder="https://sbconfig.example.com"
+            />
+            {fieldErrors.canonical_url && (
+              <p className="text-destructive text-sm mt-1 font-mono">{fieldErrors.canonical_url}</p>
+            )}
+            <p className="text-muted-foreground text-sm mt-1 font-mono">
+              Optional: Set a fixed URL to include in generated file headers instead of the request host
+            </p>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -271,10 +296,58 @@ export function ConfigForm() {
           </p>
         </div>
 
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="flex items-center gap-3 text-muted-foreground text-sm font-semibold uppercase tracking-wide mb-2">
+                <input
+                  type="checkbox"
+                  name="enable_vector"
+                  checked={!!(formData as any).enable_vector}
+                  onChange={handleInputChange}
+                  className="h-4 w-4"
+                />
+                Enable Vector (log collector)
+              </label>
+              <p className="text-muted-foreground text-sm mt-1 font-mono">
+                Collect container logs locally with Vector.
+              </p>
+            </div>
+            <div className="form-group">
+              <label className="flex items-center gap-3 text-muted-foreground text-sm font-semibold uppercase tracking-wide mb-2">
+                <input
+                  type="checkbox"
+                  name="enable_logflare"
+                  checked={!!(formData as any).enable_logflare}
+                  onChange={handleInputChange}
+                  className="h-4 w-4"
+                />
+                Enable Logflare (analytics UI)
+              </label>
+              <p className="text-muted-foreground text-sm mt-1 font-mono">
+                Exposes http://localhost:4000 for browsing logs/analytics.
+              </p>
+            </div>
+            <div className="form-group md:col-span-2">
+              <label className="flex items-center gap-3 text-muted-foreground text-sm font-semibold uppercase tracking-wide mb-2">
+                <input
+                  type="checkbox"
+                  name="enable_pgvector"
+                  checked={!!(formData as any).enable_pgvector}
+                  onChange={handleInputChange}
+                  className="h-4 w-4"
+                />
+                Enable pgvector extension (for embeddings)
+              </label>
+              <p className="text-muted-foreground text-sm mt-1 font-mono">
+                Generates a pgvector init SQL and includes docs in the compose/db section.
+              </p>
+            </div>
+          </div>
+
         <motion.button
           type="submit"
           disabled={isLoading}
-          className="holographic-button w-full text-base py-4 flex items-center justify-center gap-2"
+          className="holographic-button cta-primary-button w-full flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >

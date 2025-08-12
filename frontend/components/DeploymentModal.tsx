@@ -33,6 +33,8 @@ export function DeploymentModal({
     remotePath: '/opt/supabase',
     includeOverride: false,
     runDockerUp: false,
+    confirmDestructive: false,
+    confirmPhrase: '',
   });
   
   const [isDeploying, setIsDeploying] = useState(false);
@@ -79,6 +81,8 @@ export function DeploymentModal({
       remotePath: '/opt/supabase',
       includeOverride: false,
       runDockerUp: false,
+      confirmDestructive: false,
+      confirmPhrase: '',
     });
     setIsDeploying(false);
     setDeploymentSteps([]);
@@ -257,6 +261,16 @@ export function DeploymentModal({
                   )}
 
                   <div className="space-y-4">
+                    <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-lg">
+                      <p className="font-mono text-sm font-semibold mb-2">
+                        Warning: This action will modify files and services on your remote server.
+                      </p>
+                      <ul className="list-disc ml-5 font-mono text-xs space-y-1">
+                        <li>Existing files at the target path may be overwritten.</li>
+                        <li>Docker services may be started/stopped.</li>
+                        <li>Ensure you have backups or snapshots before proceeding.</li>
+                      </ul>
+                    </div>
                     <div>
                       <label className="block text-muted-foreground text-sm font-semibold uppercase tracking-wide mb-2">
                         VPS Host/IP *
@@ -393,6 +407,37 @@ export function DeploymentModal({
                       </label>
                     </div>
 
+                    <div className="mt-2 p-3 rounded border border-destructive/60 bg-destructive/5">
+                      <div className="flex items-center gap-3 mb-2">
+                        <input
+                          id="confirmDestructive"
+                          type="checkbox"
+                          name="confirmDestructive"
+                          checked={formData.confirmDestructive}
+                          onChange={handleInputChange}
+                        />
+                        <label htmlFor="confirmDestructive" className="font-mono text-sm text-destructive">
+                          I understand this is destructive and I have backups.
+                        </label>
+                      </div>
+                      <div>
+                        <label className="block text-muted-foreground text-xs font-semibold uppercase tracking-wide mb-1">
+                          Type DEPLOY to confirm
+                        </label>
+                        <input
+                          type="text"
+                          name="confirmPhrase"
+                          value={formData.confirmPhrase}
+                          onChange={handleInputChange}
+                          className={`neon-input ${fieldErrors.confirmPhrase ? 'border-destructive' : ''}`}
+                          placeholder="DEPLOY"
+                        />
+                        {fieldErrors.confirmPhrase && (
+                          <p className="text-destructive text-sm mt-1 font-mono">{fieldErrors.confirmPhrase}</p>
+                        )}
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-muted-foreground text-sm font-semibold uppercase tracking-wide mb-2">
                         <Lock size={14} className="inline mr-1" />
@@ -483,6 +528,7 @@ export function DeploymentModal({
                   className="holographic-button"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  disabled={!formData.confirmDestructive || formData.confirmPhrase.toUpperCase() !== 'DEPLOY'}
                 >
                   Deploy Now
                 </motion.button>

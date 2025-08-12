@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
     if (typeof data.runDockerUp === 'string') {
       data.runDockerUp = data.runDockerUp === 'true';
     }
+    if (typeof data.confirmDestructive === 'string') {
+      data.confirmDestructive = data.confirmDestructive === 'true';
+    }
 
     // Validate input using Zod schema
     const validatedData = DeploymentSchema.parse(data);

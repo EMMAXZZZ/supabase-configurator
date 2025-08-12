@@ -119,6 +119,22 @@ export default function ResultPage() {
               content={configData.overrideContent}
               description="Optional overrides merged automatically by Docker Compose (ports, volumes, dev-only tweaks)"
             />
+
+            {configData.pgvectorSqlContent && (
+              <FileDisplay
+                filename="01-pgvector.sql"
+                content={configData.pgvectorSqlContent}
+                description="Initialization SQL to enable the pgvector extension and an example table"
+              />
+            )}
+
+            {configData.vectorConfigContent && (
+              <FileDisplay
+                filename="volumes/logs/vector.yml"
+                content={configData.vectorConfigContent}
+                description="Sample Vector config to collect Docker logs and forward to sinks (console, Logflare)"
+              />
+            )}
           </div>
 
           {/* Next Steps */}
