@@ -108,3 +108,11 @@ wrangler.toml.bak
 
 # Generated files
 *.generated.*
+
+# Secrets and large archives
+mikes-dirty-supabase-secrets.zip
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.tgz
