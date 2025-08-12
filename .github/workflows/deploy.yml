@@ -50,6 +50,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --config wrangler.staging.toml
           workingDirectory: workers
+          wranglerVersion: '4'
 
       - name: Comment PR with staging URL
         if: github.event_name == 'pull_request'
@@ -95,6 +96,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --config wrangler.toml
           workingDirectory: workers
+          wranglerVersion: '4'
 
       - name: Create deployment status
         uses: actions/github-script@v7
