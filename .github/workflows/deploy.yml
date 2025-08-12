@@ -7,12 +7,15 @@ on:
       - staging
     paths:
       - 'workers/**'
+      - 'frontend/**'
       - '.github/workflows/deploy.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'workers/**'
+      - 'frontend/**'
+  workflow_dispatch:
 
 jobs:
   # Deploy to staging on staging branch or PR
