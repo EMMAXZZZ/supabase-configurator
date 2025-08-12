@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
+  // Only apply security headers to HTML document requests (not API, not assets)
+  const accept = req.headers.get('accept') || '';
+  if (!accept.includes('text/html')) {
+    return NextResponse.next();
+  }
+
   const res = NextResponse.next();
 
   // Conservative Content Security Policy; adjust as app needs evolve
@@ -27,5 +33,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg).*)'],
+  // Exclude Next assets and API routes
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|api/).*)'],
 };

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       if (raw && raw.trim().length > 0) {
         try {
           data = JSON.parse(raw);
-        } catch (e) {
+        } catch {
           return NextResponse.json(
             { error: 'Invalid JSON body', message: 'Request body is not valid JSON.' },
             { status: 400 }

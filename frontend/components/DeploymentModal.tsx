@@ -1,5 +1,6 @@
 'use client';
 
+import type React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, Server, Globe, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -144,16 +145,6 @@ export function DeploymentModal({
     });
   };
 
-  const simulateDeployment = async () => {
-    const stepDelays = [2000, 1500, 2000, 3000, 4000, 2000, 1000];
-    
-    for (let i = 0; i < steps.length; i++) {
-      const step = steps[i];
-      updateStepStatus(step.step, 'active');
-      await sleep(stepDelays[i]);
-      updateStepStatus(step.step, 'completed');
-    }
-  };
 
   const handleDeploy = async () => {
     setErrors([]);
@@ -176,7 +167,7 @@ export function DeploymentModal({
 
       // Call API to upload files (and optionally run docker compose)
       updateStepStatus(1, 'active');
-      const result = await deployToVPS(deploymentData);
+      await deployToVPS(deploymentData);
       updateStepStatus(1, 'completed');
       // Mark upload step as completed
       updateStepStatus(2, 'completed');
