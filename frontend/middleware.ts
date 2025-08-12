@@ -4,13 +4,17 @@ import type { NextRequest } from 'next/server';
 export function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
+  // Conservative Content Security Policy; adjust as app needs evolve
   const csp = [
     "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "font-src 'self' data:",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-    "connect-src 'self'",
+    "connect-src 'self' https:",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
   ].join('; ');
 
   res.headers.set('Content-Security-Policy', csp);

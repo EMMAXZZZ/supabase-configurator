@@ -300,7 +300,7 @@ ${logflareEnabled ? `  # Forward structured logs to Logflare (analytics service)
     const composeContentWithHeader = `${composeHeader}${composeContent}`;
     const overrideContentWithHeader = `${overrideHeader}${overrideContent}`;
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       envContent: envContentWithHeader,
       composeContent: composeContentWithHeader,
       overrideContent: overrideContentWithHeader,
@@ -308,18 +308,31 @@ ${logflareEnabled ? `  # Forward structured logs to Logflare (analytics service)
       vectorConfigContent,
       config
     });
+    // Prevent caching of secrets
+    res.headers.set('Cache-Control', 'no-store');
+    res.headers.set('Pragma', 'no-cache');
+    return res;
 
   } catch (error: any) {
-    console.error('Configuration generation failed:', error);
+    // Sanitize error logging to avoid leaking secrets
+    const safeError = {
+      name: error?.name || 'Error',
+      message: error?.message || 'Unknown error',
+      stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
+    };
+    console.error('Configuration generation failed:', safeError);
 
     if (error.name === 'ZodError') {
       const errorMessages = error.errors.map((err: any) => `${err.path.join('.')}: ${err.message}`);
       return NextResponse.json({ error: 'Validation failed', errors: errorMessages }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error', message: process.env.NODE_ENV === 'development' ? error.message : 'Configuration generation failed' },
+    const errRes = NextResponse.json(
+      { error: 'Internal server error', message: process.env.NODE_ENV === 'development' ? (error?.message || 'Error') : 'Configuration generation failed' },
       { status: 500 }
     );
+    errRes.headers.set('Cache-Control', 'no-store');
+    errRes.headers.set('Pragma', 'no-cache');
+    return errRes;
   }
 }
