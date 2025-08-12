@@ -1,7 +1,3 @@
-/**
- * Cloudflare Workers version of Supabase Configurator
- * Handles form processing and configuration generation
- */
 
 // HTML templates as template literals
 const INDEX_TEMPLATE = `
