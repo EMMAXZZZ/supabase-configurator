@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Deploy Button</title>
+</head>
+<body>
+    <h1>Deploy Button Test</h1>
+    <button id="testDeploy">Test Deploy API</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('testDeploy').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/deploy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        vpsHost: '123.456.789.101',
+                        vpsUser: 'root',
+                        vpsPort: 22,
+                        domainName: 'test.example.com',
+                        sslEmail: 'test@example.com',
+                        envContent: 'TEST_ENV=value',
+                        composeContent: 'version: "3.8"'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+            } catch (error) {
+                resultDiv.innerHTML = 'Error: ' + error.message;
+                console.error('Deploy test failed:', error);
+            }
+        });
+    </script>
+</body>
+</html>

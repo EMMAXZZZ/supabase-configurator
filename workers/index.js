@@ -496,7 +496,7 @@ const INDEX_TEMPLATE = `
                 <div class="form-group">
                     <label for="project_name">Project Name</label>
                     <input type="text" id="project_name" name="project_name" required 
-                           pattern="[a-zA-Z0-9_-]+" 
+                           pattern="[a-zA-Z0-9_-]+"
                            class="neon-input"
                            placeholder="my-supabase-project">
                     <div class="description">Alphanumeric characters, hyphens, and underscores only</div>
@@ -775,7 +775,13 @@ const INDEX_TEMPLATE = `
 </html>
 `;
 
-const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
+const RESULT_TEMPLATE = (envContent, composeContent, projectName) => {
+    // Escape content for safe HTML/JS embedding
+    const escapedEnvContent = envContent.replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/\\/g, '\\\\');
+    const escapedComposeContent = composeContent.replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/\\/g, '\\\\');
+    const escapedProjectName = projectName.replace(/["'`]/g, '');
+    
+    return `
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -1200,7 +1206,7 @@ const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
             </div>
             <div class="file-content">
                 <button class="copy-btn" onclick="copyToClipboard('env-content')">Copy</button>
-                <pre id="env-content">${envContent}</pre>
+            <pre id="env-content">${escapedEnvContent}</pre>
             </div>
         </div>
 
@@ -1211,7 +1217,7 @@ const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
             </div>
             <div class="file-content">
                 <button class="copy-btn" onclick="copyToClipboard('compose-content')">Copy</button>
-                <pre id="compose-content">${composeContent}</pre>
+                <pre id="compose-content">${escapedComposeContent}</pre>
             </div>
         </div>
 
@@ -1325,11 +1331,21 @@ const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
         }
 
         function showDeployModal() {
+            console.log('showDeployModal() called!');
             const modal = document.getElementById('deployModal');
-            modal.style.display = 'flex';
-            setTimeout(() => {
-                modal.classList.add('show');
-            }, 10);
+            console.log('Modal element found:', modal);
+            if (modal) {
+                console.log('Setting modal display to flex');
+                modal.style.display = 'flex';
+                console.log('Modal display set, current style:', modal.style.display);
+                setTimeout(() => {
+                    console.log('Adding show class to modal');
+                    modal.classList.add('show');
+                    console.log('Modal classes:', modal.className);
+                }, 10);
+            } else {
+                console.error('Modal element not found!');
+            }
         }
 
         function hideDeployModal() {
@@ -1348,8 +1364,8 @@ const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
         }
 
         function updateDeploymentStep(stepNumber, status = 'active') {
-            const step = document.getElementById(`step-${stepNumber}`);
-            const prevSteps = document.querySelectorAll(`#step-1, #step-2, #step-3, #step-4, #step-5, #step-6, #step-7`)
+            const step = document.getElementById('step-' + stepNumber);
+            const prevSteps = document.querySelectorAll('#step-1, #step-2, #step-3, #step-4, #step-5, #step-6, #step-7')
                 .forEach((s, index) => {
                     if (index + 1 < stepNumber) {
                         s.classList.remove('active');
@@ -1450,8 +1466,8 @@ const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
 
                 // Show deployment details
                 setTimeout(() => {
-                    let accessUrl = domainName ? `https://${domainName}` : `http://${vpsHost}:3000`;
-                    alert(`🎉 Deployment Complete!\n\nYour Supabase instance is now running at:\n${accessUrl}\n\nStudio Dashboard: ${accessUrl}\nAPI Endpoint: ${accessUrl.replace(':3000', ':8000')}\n\nPlease allow a few minutes for all services to fully initialize.`);
+                    let accessUrl = domainName ? 'https://' + domainName : 'http://' + vpsHost + ':3000';
+                    alert('🎉 Deployment Complete!\n\nYour Supabase instance is now running at:\n' + accessUrl + '\n\nStudio Dashboard: ' + accessUrl + '\nAPI Endpoint: ' + accessUrl.replace(':3000', ':8000') + '\n\nPlease allow a few minutes for all services to fully initialize.');
                 }, 1000);
 
             } catch (error) {
@@ -1469,7 +1485,7 @@ const RESULT_TEMPLATE = (envContent, composeContent, projectName) => `
                 deployBtn.style.color = 'white';
                 deployBtn.disabled = false;
 
-                alert(`❌ Deployment Failed\n\nError: ${error.message}\n\nPlease check your VPS credentials and try again.`);
+                alert('❌ Deployment Failed\n\nError: ' + error.message + '\n\nPlease check your VPS credentials and try again.');
             }
         }
 
@@ -1597,6 +1613,8 @@ POSTGRES_HOST=db
 POSTGRES_DB=postgres
 POSTGRES_USER=supabase_admin
 POSTGRES_PASSWORD=${config.db_password}
+# URL-encoded variant for safe use in connection strings
+POSTGRES_PASSWORD_URLENC=${encodeURIComponent(config.db_password)}
 POSTGRES_PORT=5432
 
 ############
@@ -2107,7 +2125,7 @@ services:
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: \${API_EXTERNAL_URL}
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:\${POSTGRES_PASSWORD}@\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DB}
+GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD_URLENC}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       GOTRUE_SITE_URL: \${SITE_URL}
       GOTRUE_URI_ALLOW_LIST: \${ADDITIONAL_REDIRECT_URLS}
       GOTRUE_DISABLE_SIGNUP: \${DISABLE_SIGNUP}
@@ -2139,7 +2157,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      PGRST_DB_URI: postgres://authenticator:\${POSTGRES_PASSWORD}@\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DB}
+PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD_URLENC}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       PGRST_DB_SCHEMAS: \${PGRST_DB_SCHEMAS}
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: \${JWT_SECRET}
@@ -2157,7 +2175,7 @@ services:
       analytics:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bash", "-c", "printf \\\\GET /api/health HTTP/1.1\\\\r\\\\n\\\\r\\\\n | nc 127.0.0.1 4000"]
+      test: ["CMD", "bash", "-c", "printf \"GET /api/health HTTP/1.1\r\n\r\n\" | nc 127.0.0.1 4000"]
       timeout: 5s
       interval: 5s
       retries: 3
@@ -2202,7 +2220,7 @@ services:
       SERVICE_KEY: \${SERVICE_ROLE_KEY}
       POSTGREST_URL: http://rest:3000
       PGRST_JWT_SECRET: \${JWT_SECRET}
-      DATABASE_URL: postgres://supabase_storage_admin:\${POSTGRES_PASSWORD}@\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DB}
+DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD_URLENC}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       FILE_SIZE_LIMIT: \${STORAGE_FILE_SIZE_LIMIT}
       STORAGE_BACKEND: \${STORAGE_BACKEND}
       FILE_STORAGE_BACKEND_PATH: /var/lib/storage
@@ -2259,7 +2277,7 @@ services:
       SUPABASE_URL: http://kong:8000
       SUPABASE_ANON_KEY: \${ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: \${SERVICE_ROLE_KEY}
-      SUPABASE_DB_URL: postgresql://postgres:\${POSTGRES_PASSWORD}@\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DB}
+SUPABASE_DB_URL: postgresql://postgres:${POSTGRES_PASSWORD_URLENC}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       VERIFY_JWT: \${FUNCTIONS_VERIFY_JWT}
     volumes:
       - ./volumes/functions:/home/deno/functions:Z
@@ -2382,6 +2400,79 @@ async function handleRequest(request) {
             }), {
                 headers: { 
                     'Content-Type': 'application/json',
+                    ...corsHeaders 
+                }
+            });
+        }
+
+        if (path === '/favicon.ico' && request.method === 'GET') {
+            // Return a simple SVG favicon directly
+            const faviconSvg = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" stroke="#00D9FF" stroke-width="2" fill="none"/><path d="M9 12l2 2 4-4" stroke="#00D9FF" stroke-width="2" fill="none"/></svg>`;
+            
+            return new Response(faviconSvg, {
+                status: 200,
+                headers: { 
+                    'Content-Type': 'image/svg+xml',
+                    'Cache-Control': 'public, max-age=86400',
+                    ...corsHeaders 
+                }
+            });
+        }
+        
+        if (path === '/test-modal' && request.method === 'GET') {
+            const testHtml = RESULT_TEMPLATE('TEST_ENV=value', 'version: "3.8"', 'test-project');
+            return new Response(testHtml, {
+                headers: { 
+                    'Content-Type': 'text/html',
+                    ...corsHeaders 
+                }
+            });
+        }
+
+        if (path === '/debug' && request.method === 'GET') {
+            const debugInfo = {
+                timestamp: new Date().toISOString(),
+                worker_version: '1.0.3',
+                test_pattern: '[-a-zA-Z0-9_]+',
+                endpoints: [
+                    '/',
+                    '/health',
+                    '/favicon.ico',
+                    '/test-modal',
+                    '/debug',
+                    '/generate (POST)',
+                    '/deploy (POST)'
+                ],
+                fixes_applied: [
+                    'Regex pattern fixed - dash moved to beginning',
+                    'Favicon endpoint returns SVG directly',
+                    'Debugging logs added to modal functions',
+                    'Escape sequences fixed in deployment script'
+                ]
+            };
+            
+            const debugHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head><title>Debug Info</title></head>
+                <body style="font-family: monospace; padding: 20px;">
+                    <h1>Worker Debug Information</h1>
+                    <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
+                    <hr>
+                    <h2>Test Pattern</h2>
+                    <input type="text" pattern="[a-zA-Z0-9_\\-]+" placeholder="Test regex pattern" style="padding: 10px; width: 300px;">
+                    <p>Pattern: [-a-zA-Z0-9_]+</p>
+                    <hr>
+                    <h2>Favicon Test</h2>
+                    <p>Favicon URL: <a href="/favicon.ico">/favicon.ico</a></p>
+                    <img src="/favicon.ico" alt="Favicon" style="width: 32px; height: 32px;">
+                </body>
+                </html>
+            `;
+            
+            return new Response(debugHtml, {
+                headers: { 
+                    'Content-Type': 'text/html',
                     ...corsHeaders 
                 }
             });

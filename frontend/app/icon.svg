@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D9FF"/>
+      <stop offset="100%" stop-color="#9D4EDD"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="32" y="32" width="448" height="448" rx="56" ry="56" fill="#0A0B1A" stroke="url(#g)" stroke-width="4"/>
+
+  <!-- Stylized rocket -->
+  <g filter="url(#glow)">
+    <!-- Exhaust plume -->
+    <path d="M256 360 C 240 400, 272 400, 256 456" fill="url(#g)" opacity="0.35"/>
+
+    <!-- Rocket body -->
+    <path d="M256 112 C 300 152, 320 200, 320 232 C 320 248, 312 272, 304 288 L 256 264 L 208 288 C 200 272, 192 248, 192 232 C 192 200, 212 152, 256 112 Z" fill="none" stroke="url(#g)" stroke-width="10" stroke-linejoin="round"/>
+
+    <!-- Nose cone highlight -->
+    <path d="M256 120 L 268 136" stroke="#00D9FF" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+
+    <!-- Window -->
+    <circle cx="256" cy="208" r="18" fill="#0A0B1A" stroke="#00D9FF" stroke-width="8"/>
+
+    <!-- Fins -->
+    <path d="M208 288 L 192 320 L 232 304" fill="none" stroke="#00D9FF" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M304 288 L 320 320 L 280 304" fill="none" stroke="#00D9FF" stroke-width="8" stroke-linejoin="round"/>
+
+    <!-- Flame -->
+    <path d="M256 312 C 248 332, 264 340, 256 368 C 248 340, 264 332, 256 312 Z" fill="url(#g)"/>
+  </g>
+
+  <!-- Subtle grid lines -->
+  <g opacity="0.08">
+    <path d="M96 96 H416" stroke="#00D9FF" stroke-width="2"/>
+    <path d="M96 160 H416" stroke="#00D9FF" stroke-width="2"/>
+    <path d="M96 224 H416" stroke="#00D9FF" stroke-width="2"/>
+    <path d="M96 288 H416" stroke="#00D9FF" stroke-width="2"/>
+    <path d="M96 352 H416" stroke="#00D9FF" stroke-width="2"/>
+    <path d="M96 416 H416" stroke="#00D9FF" stroke-width="2"/>
+  </g>
+</svg>
+

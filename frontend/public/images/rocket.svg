@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00FFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00FFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00C8FF"/>
+      <stop offset="100%" stop-color="#4DD9FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="256" height="256" fill="url(#glow)"/>
+
+  <!-- Rocket body -->
+  <g transform="translate(90,40)">
+    <path d="M38 0C18 14 6 56 6 80c0 13 3 26 9 38l29 0c6-12 9-25 9-38C53 56 42 14 38 0z" fill="url(#body)" stroke="#00E5FF" stroke-width="2"/>
+    <circle cx="32" cy="56" r="14" fill="#0A1F2E" stroke="#79F5FF" stroke-width="2"/>
+    <circle cx="32" cy="56" r="8" fill="#1E6B8A"/>
+
+    <!-- Fins -->
+    <path d="M6 96c-10 6-18 16-20 28l24-6 8-16-12-6z" fill="#00B6E6" stroke="#7BEAFF" stroke-width="2"/>
+    <path d="M62 96c10 6 18 16 20 28l-24-6-8-16 12-6z" fill="#00B6E6" stroke="#7BEAFF" stroke-width="2"/>
+
+    <!-- Exhaust -->
+    <path d="M28 118c-8 10-14 22-16 34 8-6 16-10 24-12 8 2 16 6 24 12-2-12-8-24-16-34H28z" fill="#9CF9FF" fill-opacity="0.8"/>
+  </g>
+
+  <!-- Lightning trail -->
+  <path d="M128 150c-6 12-10 18-14 30 10-4 16-8 24-12-6 10-10 16-16 26 12-6 20-10 32-16-10 12-16 18-24 28 18-8 30-12 48-20" stroke="#A7FDFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+</svg>
+

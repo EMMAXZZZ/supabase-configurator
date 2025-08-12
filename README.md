@@ -41,17 +41,37 @@ npm run dev
 
 ## 🏗️ Architecture
 
-### Production Stack
+### Current Production Stack (v1.0)
 - **🌐 Cloudflare Workers** - Global edge computing platform
 - **🔒 Web Crypto API** - Secure cryptographic operations
 - **📦 Zero dependencies** - Self-contained application
 - **🌍 275+ Edge locations** - Worldwide distribution
 
-### Development Stack
-- **📝 Vanilla JavaScript** - No frameworks, maximum performance
-- **🎨 Inline CSS** - No external stylesheets, faster loading
+### Current Development Stack
+- **📝 Vanilla JavaScript** - Monolithic Workers script (4,000+ lines)
+- **🎨 Inline CSS** - TRON-style cyberpunk theme with particle effects
 - **🧪 GitHub Actions** - Automated testing and deployment
 - **🔍 Lighthouse CI** - Performance monitoring
+
+### 🚀 Upcoming Migration (v2.0)
+**Target Architecture**: Hybrid Next.js Frontend + Cloudflare Workers Backend
+
+```
+┌─────────────────────┐    API Calls    ┌──────────────────────┐
+│   Next.js Frontend  │ ──────────────→ │ Cloudflare Workers   │
+│  (Cloudflare Pages) │                 │    (Backend API)     │
+│                     │ ←────────────── │                      │
+└─────────────────────┘    Responses    └──────────────────────┘
+```
+
+**Migration Benefits**:
+- ✅ **Type Safety** with TypeScript
+- ✅ **Component-based architecture** for maintainability
+- ✅ **Modern development experience** with hot reload
+- ✅ **Better testing capabilities** for components and utilities
+- ✅ **Easier feature additions** (AI integration, user accounts)
+
+**Migration Status**: Ready to begin - See [PROJECT_STATUS.md](PROJECT_STATUS.md)
 
 ## 🛠️ Configuration Options
 
@@ -206,9 +226,16 @@ Expected costs for typical usage: **$0/month** 💸
 
 ## 📚 Documentation
 
+### Current Project
+- **[PROJECT STATUS](workers/PROJECT_STATUS.md)** - Current status and migration roadmap
 - **[GitHub Setup Guide](GITHUB_SETUP.md)** - Complete deployment setup
 - **[Cloudflare Deployment](CLOUDFLARE_DEPLOYMENT.md)** - Workers deployment details
 - **[Production Deployment](DEPLOYMENT.md)** - Traditional server deployment
+
+### Migration Planning
+- **[Migration Plan](MIGRATION_PLAN.md)** - Detailed Next.js migration guide
+- **[Hybrid Architecture](CLOUDFLARE_NEXTJS_APPROACH.md)** - Recommended approach
+- **[AI Integration Plan](AI_INTEGRATION_PLAN.md)** - Future AI-powered features
 
 ## 🆘 Support & Issues
 
