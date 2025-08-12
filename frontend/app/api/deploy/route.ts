@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
     if (typeof data.runDockerUp === 'string') {
       data.runDockerUp = data.runDockerUp === 'true';
     }
+    if (typeof data.confirmDestructive === 'string') {
+      data.confirmDestructive = data.confirmDestructive === 'true';
+    }
 
     // Validate input using Zod schema
     const validatedData = DeploymentSchema.parse(data);
@@ -72,7 +75,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, message: `Files uploaded to ${remotePath} on ${vpsHost}${runDockerUp ? ' and docker compose started' : ''}` });
 
   } catch (error: any) {
-    console.error('Deployment failed:', error);
+    // Sanitize error logging to avoid leaking credentials or file contents
+    const safeError = {
+      name: error?.name || 'Error',
+      message: error?.message || 'Deployment error',
+      stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined,
+    };
+    console.error('Deployment failed:', safeError);
 
     if (error.name === 'ZodError') {
       const errorMessages = error.errors.map((err: any) => 
@@ -89,13 +98,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
+    const res = NextResponse.json(
       { 
         success: false,
         error: 'Deployment failed',
-        message: process.env.NODE_ENV === 'development' ? error.message : 'Deployment failed'
+        message: process.env.NODE_ENV === 'development' ? (error?.message || 'Deployment failed') : 'Deployment failed'
       },
       { status: 500 }
     );
+    // Do not cache error payloads that might reflect sensitive context
+    res.headers.set('Cache-Control', 'no-store');
+    res.headers.set('Pragma', 'no-cache');
+    return res;
   }
 }
