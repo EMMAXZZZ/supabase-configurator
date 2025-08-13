@@ -8,11 +8,15 @@ compatibility_flags = ["nodejs_compat"]
 command = ""
 upload = { format = "modules" }
 
-# Production routes for SBConfig.com
-routes = [
-  { pattern = "sbconfig.com/*", zone_name = "sbconfig.com" },
-  { pattern = "www.sbconfig.com/*", zone_name = "sbconfig.com" }
-]
+# Deploy to workers.dev subdomain first (comment out for custom domain)
+# This avoids "not found" errors if custom domain isn't set up in Cloudflare
+# Uncomment routes below once sbconfig.com is properly configured in Cloudflare
+
+# Production routes for SBConfig.com (uncomment when domain is ready)
+# routes = [
+#   { pattern = "sbconfig.com/*", zone_name = "sbconfig.com" },
+#   { pattern = "www.sbconfig.com/*", zone_name = "sbconfig.com" }
+# ]
 
 # Environment variables
 [vars]

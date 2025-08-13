@@ -8,10 +8,13 @@ compatibility_flags = ["nodejs_compat"]
 command = ""
 upload = { format = "modules" }
 
-# Staging routes for preview subdomain
-routes = [
-  { pattern = "staging.sbconfig.com/*", zone_name = "sbconfig.com" }
-]
+# Deploy to workers.dev subdomain first (comment out for custom domain)
+# Uncomment when staging.sbconfig.com is configured in Cloudflare
+
+# Staging routes for preview subdomain (uncomment when domain is ready)
+# routes = [
+#   { pattern = "staging.sbconfig.com/*", zone_name = "sbconfig.com" }
+# ]
 
 # Environment variables
 [vars]
