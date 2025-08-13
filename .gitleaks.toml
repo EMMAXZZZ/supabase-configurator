@@ -1,52 +1,28 @@
 # GitLeaks configuration for Supabase Configurator
-# This project generates configuration templates with placeholder secrets
+title = "Supabase Configurator GitLeaks Config"
 
-title = "gitleaks config for Supabase Configurator"
+# Extend default rules with allowlists for template generation files
+[extend]
+useDefault = true
 
-# Allowlist specific patterns that are known to be safe template values
-[[rules.allowlist]]
-commit = "ALL"
-description = "Allow Supabase default development keys in template generation"
+# Global allowlist for files containing template patterns
+[allowlist]
+description = "Allow template generation files with example secrets"
+commits = ["ALL"]
 paths = [
-    '''workers/modules/generators.mjs''',
-    '''workers/.*\.template$''',
-    '''.*docker-compose.*\.yml$''',
-]
-regexTarget = "line"
-regexes = [
-    # Allow hardcoded development/template values that are replaced at runtime
-    '''supabaserealtimedev''',
-    '''REALTIME_DB_ENC_KEY''',
-    '''REALTIME_SECRET_KEY_BASE''',
-    # Allow template literals and environment variable references
-    '''\$\{.*\}''',
-    '''\\$\{.*\}''',
-]
-
-[[rules.allowlist]]
-commit = "ALL"  
-description = "Allow generated configuration examples and templates"
-paths = [
-    '''workers/modules/.*\.mjs$''',
-    '''.*\.template$''',
-    '''example.*''',
-    '''.*docker-compose.*''',
-]
-regexTarget = "match"
-regexes = [
-    # Allow environment variable placeholders
-    '''env\w+\s*[:=]\s*\$\{[^}]+\}''',
-    # Allow template generation function calls
-    '''generateSecureSecret\(\d+\)''',
-    # Allow configuration template literals
-    '''return\s+`[\s\S]*`''',
-]
-
-[[rules.allowlist]]
-commit = "ALL"
-description = "Allow backup and legacy files with old patterns"
-paths = [
+    # Template and generator files
+    '''workers/modules/generators\.mjs''',
+    '''workers/modules/templates\.mjs''',
+    '''workers/modules/utils\.mjs''',
+    # Backup and legacy files  
+    '''workers/index-old\.mjs''',
+    '''workers/index\.backup\..*''',
+    '''workers/index\.legacy\..*''',
     '''.*backup.*''',
-    '''.*legacy.*''', 
+    '''.*legacy.*''',
     '''.*old\..*''',
+    # Configuration templates
+    '''.*\.template$''',
+    '''.*docker-compose.*\.yml$''',
+    '''.*\.env\.example$''',
 ]
