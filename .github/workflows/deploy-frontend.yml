@@ -1,4 +1,4 @@
-name: Deploy Frontend to Vercel
+name: Deploy Frontend to Cloudflare Pages
 
 on:
   push:
@@ -22,6 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Frontend to Staging
     environment: staging
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,24 +36,31 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: "Preflight: verify Cloudflare secrets (staging)"
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+            echo "::error::Missing Cloudflare secrets. Ensure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are set in repository or environment secrets."
+            exit 1
+          fi
+
       - name: Install frontend dependencies
         run: npm ci
         working-directory: frontend
 
-      - name: Build frontend
+      - name: Build frontend for Cloudflare Pages
         run: npm run build
         working-directory: frontend
         env:
           NODE_ENV: production
 
-      - name: Deploy to Vercel (Staging)
-        uses: amondnet/vercel-action@v25
+      - name: Deploy to Cloudflare Pages (Staging)
+        uses: cloudflare/pages-action@v1
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: frontend
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: supabase-configurator-staging
+          directory: frontend/out
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment PR with staging URL
         if: github.event_name == 'pull_request'
@@ -61,7 +71,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🚀 Frontend staging deployment complete!\\n\\n**Preview URL:** Available in Vercel deployment logs\\n\\nTest your changes before merging to production.'
+              body: '🚀 Frontend staging deployment complete!\\n\\n**Preview URL:** https://supabase-configurator-staging.pages.dev\\n\\nTest your changes before merging to production.'
             })
 
   # Deploy to production on main branch
@@ -70,6 +80,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Frontend to Production
     environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,6 +94,13 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: "Preflight: verify Cloudflare secrets (production)"
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+            echo "::error::Missing Cloudflare secrets. Ensure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are set in repository or environment secrets."
+            exit 1
+          fi
+
       - name: Install frontend dependencies
         run: npm ci
         working-directory: frontend
@@ -89,35 +109,35 @@ jobs:
         run: npm run typecheck
         working-directory: frontend
 
-      - name: Run linting  
+      - name: Run linting
         run: npm run lint
         working-directory: frontend
 
-      - name: Build frontend
+      - name: Build frontend for Cloudflare Pages
         run: npm run build
         working-directory: frontend
         env:
           NODE_ENV: production
 
-      - name: Deploy to Vercel (Production)
+      - name: Deploy to Cloudflare Pages (Production)
         id: deploy
-        uses: amondnet/vercel-action@v25
+        uses: cloudflare/pages-action@v1
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: frontend
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: supabase-configurator
+          directory: frontend/out
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Show deployment URL
         run: |
-          echo "🚀 Frontend deployed successfully to Vercel!"
-          echo "📍 Production URL: https://supabase-configurator.vercel.app (or your custom domain)"
+          echo "🚀 Frontend deployed successfully to Cloudflare Pages!"
+          echo "📍 Production URL: https://supabase-configurator.pages.dev"
+          echo "📍 Custom domain can be configured in Cloudflare Pages dashboard"
           echo ""
           echo "🔧 Next steps:"
-          echo "   1. Configure custom domain in Vercel dashboard"
-          echo "   2. Update DNS records if using custom domain"
+          echo "   1. Configure custom domain in Cloudflare Pages dashboard"
+          echo "   2. Update DNS records to point to Cloudflare Pages"
           echo "   3. Enable Lighthouse testing with confirmed URL"
 
   # Health check after deployment
@@ -128,20 +148,20 @@ jobs:
     name: Production Health Check
     steps:
       - name: Wait for deployment
-        run: sleep 30
+        run: sleep 45
 
       - name: Health Check
         run: |
           echo "Checking production health..."
-          # Test the deployment - update with your actual Vercel URL
-          URL="https://supabase-configurator.vercel.app"
+          # Test the Cloudflare Pages deployment
+          URL="https://supabase-configurator.pages.dev"
           
           if curl -f -s --max-time 10 "$URL" > /dev/null; then
             echo "✅ Frontend is accessible at $URL"
           else
             echo "❌ Frontend health check failed"
             echo "🔍 Manual check required at $URL"
-            # Don't fail the workflow since URL might be different
+            # Don't fail workflow since URL might be different initially
           fi
 
       - name: Notify on failure
@@ -156,7 +176,7 @@ jobs:
               body: `Production frontend deployment failed for commit ${context.sha}.\\n\\nPlease investigate immediately.\\n\\n**Commit:** ${context.sha}\\n**Workflow:** ${context.workflow}\\n**Run:** ${context.runId}`
             })
 
-  # Optional: Lighthouse performance test
+  # Lighthouse performance test
   lighthouse:
     needs: [deploy-production]
     if: false # Enable once URL is confirmed: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -167,13 +187,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Wait for deployment
-        run: sleep 45
+        run: sleep 60
 
       - name: Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10
         with:
           urls: |
-            https://supabase-configurator.vercel.app
+            https://supabase-configurator.pages.dev
           configPath: './.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true

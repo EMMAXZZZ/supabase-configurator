@@ -59,6 +59,91 @@ async function handleRequest(request) {
             }
         }
 
+        // JSON API endpoint for frontend
+        if (path === '/api/generate' && request.method === 'POST') {
+            const formData = await request.formData();
+            const data = Object.fromEntries(formData.entries());
+
+            // Validate input
+            const validationErrors = validateInput(data);
+            if (validationErrors.length > 0) {
+                return new Response(JSON.stringify({ 
+                    error: 'Validation failed', 
+                    details: validationErrors 
+                }), {
+                    status: 400,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        ...corsHeaders 
+                    }
+                });
+            }
+
+            // Generate secure credentials if not provided
+            const config = {
+                project_name: data.project_name,
+                domain: data.domain,
+                email: data.email,
+                db_password: data.db_password || generatePassword(32),
+                jwt_secret: data.jwt_secret || generateSecureSecret(64)
+            };
+
+            // Generate JWT keys if not provided
+            if (!data.anon_key || !data.service_key) {
+                try {
+                    const anonPayload = { role: 'anon', iss: 'supabase' };
+                    const servicePayload = { role: 'service_role', iss: 'supabase' };
+                    
+                    config.anon_key = data.anon_key || await generateJWT(config.jwt_secret, anonPayload);
+                    config.service_key = data.service_key || await generateJWT(config.jwt_secret, servicePayload);
+                } catch (error) {
+                    console.error('JWT generation error:', error);
+                    return new Response(JSON.stringify({ 
+                        error: 'Failed to generate JWT keys: ' + error.message 
+                    }), {
+                        status: 500,
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            ...corsHeaders 
+                        }
+                    });
+                }
+            } else {
+                config.anon_key = data.anon_key;
+                config.service_key = data.service_key;
+            }
+
+            // Generate configuration files and return JSON
+            try {
+                const envContent = generateEnvFile(config);
+                const composeContent = generateDockerCompose(config);
+                
+                return new Response(JSON.stringify({
+                    envContent,
+                    composeContent,
+                    overrideContent: '', // Add override if needed
+                    config
+                }), {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        ...corsHeaders 
+                    }
+                });
+
+            } catch (error) {
+                console.error('Configuration generation error:', error);
+                return new Response(JSON.stringify({ 
+                    error: 'Configuration generation failed: ' + error.message 
+                }), {
+                    status: 500,
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        ...corsHeaders 
+                    }
+                });
+            }
+        }
+
         if (path === '/generate' && request.method === 'POST') {
             const formData = await request.formData();
             const data = Object.fromEntries(formData.entries());
