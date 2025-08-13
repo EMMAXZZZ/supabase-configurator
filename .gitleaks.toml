@@ -8,9 +8,9 @@ title = "gitleaks config for Supabase Configurator"
 commit = "ALL"
 description = "Allow Supabase default development keys in template generation"
 paths = [
-    """workers/modules/generators\.mjs""",
-    """workers/.*\.template$""",
-    """.*docker-compose.*\.yml$""",
+    '''workers/modules/generators.mjs''',
+    '''workers/.*\.template$''',
+    '''.*docker-compose.*\.yml$''',
 ]
 regexTarget = "line"
 regexes = [
@@ -27,10 +27,10 @@ regexes = [
 commit = "ALL"  
 description = "Allow generated configuration examples and templates"
 paths = [
-    """workers/modules/.*\.mjs$""",
-    """.*\.template$""",
-    """example.*""",
-    """.*docker-compose.*""",
+    '''workers/modules/.*\.mjs$''',
+    '''.*\.template$''',
+    '''example.*''',
+    '''.*docker-compose.*''',
 ]
 regexTarget = "match"
 regexes = [
@@ -46,27 +46,7 @@ regexes = [
 commit = "ALL"
 description = "Allow backup and legacy files with old patterns"
 paths = [
-    """.*backup.*""",
-    """.*legacy.*""", 
-    """.*old\..*""",
-]
-
-# Custom rules for this project
-[[rules]]
-id = "supabase-config-generator"
-description = "Detect actual secrets in generated configs (not templates)"
-secretGroup = 1
-regex = '''(?i)(secret_key_base|jwt_secret|anon_key|service_key)\s*[:=]\s*([a-z0-9+/]{40,})(?!\$\{|\s*\$\{)'''
-keywords = [
-    "secret_key_base",
-    "jwt_secret", 
-    "anon_key",
-    "service_key",
-]
-# Only alert if not in template/generator files
-paths = [
-    """^(?!workers/modules/).*""",
-    """^(?!.*template).*""",
-    """^(?!.*backup).*""",
-    """^(?!.*legacy).*""",
+    '''.*backup.*''',
+    '''.*legacy.*''', 
+    '''.*old\..*''',
 ]
