@@ -141,8 +141,14 @@ jobs:
       - name: Show deployment URL
         run: |
           echo "🚀 Worker deployed successfully!"
-          echo "📍 Default URL: https://sbconfig.miskaone.workers.dev (or similar)"
+          echo "📍 Check the deployment logs above for your actual workers.dev URL"
+          echo "📍 It should be in the format: https://sbconfig.[subdomain].workers.dev"
           echo "📍 Custom domain will be available when sbconfig.com is configured in Cloudflare"
+          echo ""
+          echo "🔧 To enable Lighthouse testing:"
+          echo "   1. Copy your actual workers.dev URL from the logs"
+          echo "   2. Update .github/workflows/deploy.yml with the correct URL"
+          echo "   3. Change lighthouse job condition from 'if: false' to enable it"
 
       - name: Tail Wrangler log (last 120 lines)
         if: always()
@@ -221,10 +227,11 @@ jobs:
               body: `Production deployment health check failed for commit ${context.sha}.\n\nPlease investigate immediately.\n\n**Commit:** ${context.sha}\n**Workflow:** ${context.workflow}\n**Run:** ${context.runId}`
             })
 
-  # Lighthouse performance test (optional)
+  # Lighthouse performance test (optional - disabled until custom domain is configured)
   lighthouse:
     needs: [deploy-production]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Disabled until we have a confirmed working URL
+    if: false # Change to 'github.ref == 'refs/heads/main' && github.event_name == 'push'' when ready
     runs-on: ubuntu-latest
     name: Lighthouse Performance Test
     steps:
@@ -234,12 +241,20 @@ jobs:
       - name: Wait for deployment
         run: sleep 45
 
-      - name: Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v10
-        with:
-          urls: |
-            https://sbconfig.miskaone.workers.dev
-          configPath: './.lighthouserc.json'
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-        # Note: Update URL above once you know your actual workers.dev subdomain
+      - name: Skip Lighthouse (URL not confirmed)
+        run: |
+          echo "🔄 Lighthouse test skipped - workers.dev URL not confirmed yet"
+          echo "📝 To enable:"
+          echo "  1. Find your actual workers.dev URL from deployment logs"
+          echo "  2. Update the URL in this workflow"
+          echo "  3. Change 'if: false' to 'if: github.ref == \"refs/heads/main\"'"
+
+      # Uncomment and update URL when ready:
+      # - name: Lighthouse CI
+      #   uses: treosh/lighthouse-ci-action@v10
+      #   with:
+      #     urls: |
+      #       https://your-actual-subdomain.workers.dev
+      #     configPath: './.lighthouserc.json'
+      #     uploadArtifacts: true
+      #     temporaryPublicStorage: true
