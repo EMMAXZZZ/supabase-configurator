@@ -1,5 +1,8 @@
-name: Deploy to Cloudflare Workers
+# ARCHIVED: This workflow has been replaced by deploy-frontend.yml
+# The advanced Next.js frontend is now the primary implementation
+name: Deploy to Cloudflare Workers (ARCHIVED)
 
+# Disabled - frontend deployment takes priority
 on:
   push:
     branches:
