@@ -85,7 +85,13 @@ FUNCTIONS_VERIFY_JWT=false
 ############
 LOGFLARE_API_KEY=${generateSecureSecret(32)}
 LOGFLARE_URL=http://analytics:4000
-NEXT_ANALYTICS_BACKEND_PROVIDER=postgres`;
+NEXT_ANALYTICS_BACKEND_PROVIDER=postgres
+
+############
+# REALTIME
+############
+REALTIME_DB_ENC_KEY=supabaserealtimedev
+REALTIME_SECRET_KEY_BASE=${generateSecureSecret(64)}`;
 }
 
 /**
@@ -620,11 +626,11 @@ services:
       DB_PASSWORD: \\$\{POSTGRES_PASSWORD}
       DB_NAME: \\$\{POSTGRES_DB}
       DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
-      DB_ENC_KEY: supabaserealtimedev
+      DB_ENC_KEY: \\$\{REALTIME_DB_ENC_KEY:-supabaserealtimedev}
       API_JWT_SECRET: \\$\{JWT_SECRET}
       FLY_ALLOC_ID: fly123
       FLY_APP_NAME: realtime
-      SECRET_KEY_BASE: UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq
+      SECRET_KEY_BASE: \\$\{REALTIME_SECRET_KEY_BASE}
       ERL_AFLAGS: -proto_dist inet_tcp
       ENABLE_TAILSCALE: "false"
       DNS_NODES: "''"

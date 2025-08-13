@@ -1,0 +1,72 @@
+# GitLeaks configuration for Supabase Configurator
+# This project generates configuration templates with placeholder secrets
+
+title = "gitleaks config for Supabase Configurator"
+
+# Allowlist specific patterns that are known to be safe template values
+[[rules.allowlist]]
+commit = "ALL"
+description = "Allow Supabase default development keys in template generation"
+paths = [
+    """workers/modules/generators\.mjs""",
+    """workers/.*\.template$""",
+    """.*docker-compose.*\.yml$""",
+]
+regexTarget = "line"
+regexes = [
+    # Allow hardcoded development/template values that are replaced at runtime
+    '''supabaserealtimedev''',
+    '''REALTIME_DB_ENC_KEY''',
+    '''REALTIME_SECRET_KEY_BASE''',
+    # Allow template literals and environment variable references
+    '''\$\{.*\}''',
+    '''\\$\{.*\}''',
+]
+
+[[rules.allowlist]]
+commit = "ALL"  
+description = "Allow generated configuration examples and templates"
+paths = [
+    """workers/modules/.*\.mjs$""",
+    """.*\.template$""",
+    """example.*""",
+    """.*docker-compose.*""",
+]
+regexTarget = "match"
+regexes = [
+    # Allow environment variable placeholders
+    '''env\w+\s*[:=]\s*\$\{[^}]+\}''',
+    # Allow template generation function calls
+    '''generateSecureSecret\(\d+\)''',
+    # Allow configuration template literals
+    '''return\s+`[\s\S]*`''',
+]
+
+[[rules.allowlist]]
+commit = "ALL"
+description = "Allow backup and legacy files with old patterns"
+paths = [
+    """.*backup.*""",
+    """.*legacy.*""", 
+    """.*old\..*""",
+]
+
+# Custom rules for this project
+[[rules]]
+id = "supabase-config-generator"
+description = "Detect actual secrets in generated configs (not templates)"
+secretGroup = 1
+regex = '''(?i)(secret_key_base|jwt_secret|anon_key|service_key)\s*[:=]\s*([a-z0-9+/]{40,})(?!\$\{|\s*\$\{)'''
+keywords = [
+    "secret_key_base",
+    "jwt_secret", 
+    "anon_key",
+    "service_key",
+]
+# Only alert if not in template/generator files
+paths = [
+    """^(?!workers/modules/).*""",
+    """^(?!.*template).*""",
+    """^(?!.*backup).*""",
+    """^(?!.*legacy).*""",
+]

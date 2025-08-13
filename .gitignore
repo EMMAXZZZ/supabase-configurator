@@ -1,3 +1,11 @@
+# Backup files with potentially sensitive data
+*.backup.*
+*-old.*
+*.legacy.*
+index.backup.*
+index.legacy.*
+index-old.*
+
 # Python
 __pycache__/
 *.py[cod]
