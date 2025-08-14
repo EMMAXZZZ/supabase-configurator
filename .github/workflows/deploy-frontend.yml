@@ -49,6 +49,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
+      - name: Debug frontend directory
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Frontend directory contents:"
+          ls -la frontend/
+          echo "Package files:"
+          ls -la frontend/package*.json || echo "No package files found"
+
       - name: Install frontend dependencies
         run: npm ci
         working-directory: frontend
@@ -112,6 +120,14 @@ jobs:
           key: ${{ runner.os }}-npm-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-
+
+      - name: Debug frontend directory
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Frontend directory contents:"
+          ls -la frontend/
+          echo "Package files:"
+          ls -la frontend/package*.json || echo "No package files found"
 
       - name: Install frontend dependencies
         run: npm ci
