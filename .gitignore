@@ -65,6 +65,7 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 workers/package-lock.json
+!frontend/package-lock.json
 
 # Logs
 logs/
