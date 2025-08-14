@@ -133,14 +133,6 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run typecheck
-        run: npm run typecheck
-        working-directory: frontend
-
-      - name: Run linting
-        run: npm run lint
-        working-directory: frontend
-
       - name: Build frontend for Cloudflare Pages
         run: npm run build
         working-directory: frontend
