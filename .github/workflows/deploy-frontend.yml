@@ -145,7 +145,7 @@ jobs:
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: supabase-configurator
+          projectName: sbconfig
           directory: frontend/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
